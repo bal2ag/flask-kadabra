@@ -7,13 +7,30 @@ from functools import wraps
 __version__ = '0.1.0'
 
 class Kadabra(object):
+    """This object holds ties the Flask application object to the Kadabra
+    library. Each app object gets its own Kadabra :class:`~kadabra.Client`,
+    which it uses to generate a :class:`~kadabra.client.Collector` for each
+    request."""
     def __init__(self, app=None):
         self.app = app
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app, config=None):
+        """Configure the application to use Kadabra. Requests will have access
+        to a :class:`~kadabra.client.Collector` via the `metrics` attribute of
+        Flask's :attr:`~flask.Flask.g` object. You can record metrics anywhere
+        in the context of a request like so::
+
+            ...
+            g.metrics.add_count("userSignup", 1)
+            ...
+
+        The metrics object will be closed and sent at the end of the
+        request if any view that handles the request has been annotated with
+        :meth:`~flask_kadabra.record_metrics`."""
         app.kadabra = kadabra.Client(config)
+        self.app = app
 
         @app.before_request
         def initialize_metrics():
@@ -22,6 +39,8 @@ class Kadabra(object):
 
         @app.after_request
         def transport_metrics(response):
+            # Only send the metrics if the current view has "opted in" or they
+            # have been enabled application-wide
             if getattr(request, "record_metrics", False):
                 end_time = datetime.datetime.utcnow()
                 g.metrics.set_timer("RequestTime",
@@ -39,11 +58,18 @@ class Kadabra(object):
                 g.metrics.add_count("ClientError", client_error)
 
                 closed = g.metrics.close()
-                if not app.config.get("DISABLE_KADABRA"):
+                if not current_app.config.get("DISABLE_KADABRA"):
                     current_app.kadabra.send(closed)
             return response
 
 def record_metrics(dimensions=None):
+    """Views that are annotated with this method will cause any request they
+    handle to send all metrics collected via the Kadabra client.
+
+    :type dimensions: dict
+    :param dimensions: Any dimensions to set for metrics that are handled by
+                       this view.
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
