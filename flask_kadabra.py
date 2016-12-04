@@ -8,9 +8,9 @@ __version__ = '0.1.0'
 
 class Kadabra(object):
     """This object holds ties the Flask application object to the Kadabra
-    library. Each app object gets its own Kadabra :class:`~kadabra.Client`,
-    which it uses to generate a :class:`~kadabra.client.Collector` for each
-    request."""
+    library. Each app object gets its own :class:`~kadabra.Kadabra` instance,
+    which it uses to generate a :class:`~kadabra.client.MetricsCollector` for
+    each request."""
     def __init__(self, app=None):
         self.app = app
         if app is not None:
@@ -18,9 +18,9 @@ class Kadabra(object):
 
     def init_app(self, app, config=None):
         """Configure the application to use Kadabra. Requests will have access
-        to a :class:`~kadabra.client.Collector` via the `metrics` attribute of
-        Flask's :attr:`~flask.Flask.g` object. You can record metrics anywhere
-        in the context of a request like so::
+        to a :class:`~kadabra.client.MetricsCollector` via the `metrics`
+        attribute of Flask's :attr:`~flask.Flask.g` object. You can record
+        metrics anywhere in the context of a request like so::
 
             ...
             g.metrics.add_count("userSignup", 1)
@@ -29,20 +29,20 @@ class Kadabra(object):
         The metrics object will be closed and sent at the end of the
         request if any view that handles the request has been annotated with
         :meth:`~flask_kadabra.record_metrics`."""
-        app.kadabra = kadabra.Client(config)
+        app.kadabra = kadabra.Kadabra(config)
         self.app = app
 
         @app.before_request
         def initialize_metrics():
-            request.start_time = datetime.datetime.utcnow()
-            g.metrics = current_app.kadabra.get_collector()
+            request.start_time = _get_now()
+            g.metrics = current_app.kadabra.metrics()
 
         @app.after_request
         def transport_metrics(response):
             # Only send the metrics if the current view has "opted in" or they
             # have been enabled application-wide
             if getattr(request, "record_metrics", False):
-                end_time = datetime.datetime.utcnow()
+                end_time = _get_now()
                 g.metrics.set_timer("RequestTime",
                         (end_time - request.start_time),
                         kadabra.Units.MILLISECONDS)
@@ -64,7 +64,7 @@ class Kadabra(object):
 
 def record_metrics(dimensions=None):
     """Views that are annotated with this method will cause any request they
-    handle to send all metrics collected via the Kadabra client.
+    handle to send all metrics collected via the Kadabra client API.
 
     :type dimensions: dict
     :param dimensions: Any dimensions to set for metrics that are handled by
@@ -81,3 +81,6 @@ def record_metrics(dimensions=None):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+def _get_now():
+    return datetime.datetime.utcnow()
