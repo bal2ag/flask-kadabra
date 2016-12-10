@@ -1,7 +1,9 @@
 import datetime
 import kadabra
 
-from flask import g, request, current_app
+from flask import g, current_app
+from flask import _app_ctx_stack as stack
+
 from functools import wraps
 
 __version__ = '0.1.0'
@@ -34,17 +36,19 @@ class Kadabra(object):
 
         @app.before_request
         def initialize_metrics():
-            request.start_time = _get_now()
-            g.metrics = current_app.kadabra.metrics()
+            ctx = stack.top
+            if ctx is not None:
+                ctx.kadabra_request_start_time = _get_now()
+                g.metrics = current_app.kadabra.metrics()
 
         @app.after_request
         def transport_metrics(response):
-            # Only send the metrics if the current view has "opted in" or they
-            # have been enabled application-wide
-            if getattr(request, "record_metrics", False):
+            # Only send the metrics if the current view has "opted in".
+            ctx = stack.top
+            if ctx is not None and getattr(ctx, "enable_kadabra", False):
                 end_time = _get_now()
                 g.metrics.set_timer("RequestTime",
-                        (end_time - request.start_time),
+                        (end_time - ctx.kadabra_request_start_time),
                         kadabra.Units.MILLISECONDS)
 
                 failure = 0
@@ -73,11 +77,13 @@ def record_metrics(dimensions=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            request.record_metrics = True
-            g.metrics.set_dimension("method", func.__name__)
-            if dimensions:
-                for name,value in dimensions.iteritems():
-                    g.metrics.set_dimension(name, value)
+            ctx = stack.top
+            if ctx is not None:
+                ctx.enable_kadabra = True
+                g.metrics.set_dimension("method", func.__name__)
+                if dimensions:
+                    for name,value in dimensions.items():
+                        g.metrics.set_dimension(name, value)
             return func(*args, **kwargs)
         return wrapper
     return decorator

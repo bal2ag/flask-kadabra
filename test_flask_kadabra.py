@@ -1,4 +1,4 @@
-from flask import (Flask, g, Response, request, current_app)
+from flask import (Flask, g, Response, current_app)
 
 from flask_kadabra import Kadabra, record_metrics
 import kadabra
