@@ -66,27 +66,21 @@ class Kadabra(object):
                     current_app.kadabra.send(closed)
             return response
 
-def record_metrics(dimensions=None):
+def record_metrics(func):
     """Views that are annotated with this method will cause any request they
     handle to send all metrics collected via the Kadabra client API.
 
-    :type dimensions: dict
-    :param dimensions: Any dimensions to set for metrics that are handled by
-                       this view.
+    :param func: The view function to decorate.
+    :type func: function
     """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            ctx = stack.top
-            if ctx is not None:
-                ctx.enable_kadabra = True
-                g.metrics.set_dimension("method", func.__name__)
-                if dimensions:
-                    for name,value in dimensions.items():
-                        g.metrics.set_dimension(name, value)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        ctx = stack.top
+        if ctx is not None:
+            ctx.enable_kadabra = True
+            g.metrics.set_dimension("method", func.__name__)
+        return func(*args, **kwargs)
+    return decorated_view
 
 def _get_now():
     return datetime.datetime.utcnow()
