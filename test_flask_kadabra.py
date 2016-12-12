@@ -77,7 +77,7 @@ def test_transport_200(mock_client, mock_get_now):
     app = get_app()
 
     @app.route('/')
-    @record_metrics()
+    @record_metrics
     def test_route():
         return 'test'
 
@@ -112,7 +112,7 @@ def test_transport_500(mock_client, mock_get_now):
     app = get_app()
     
     @app.route('/')
-    @record_metrics()
+    @record_metrics
     def test_route():
         response = Response()
         response.status_code = 500
@@ -149,7 +149,7 @@ def test_transport_400(mock_client, mock_get_now):
     app = get_app()
 
     @app.route('/')
-    @record_metrics()
+    @record_metrics
     def test_route():
         response = Response()
         response.status_code = 400
@@ -187,7 +187,7 @@ def test_transport_disable(mock_client, mock_get_now):
     app.config["DISABLE_KADABRA"] = True
 
     @app.route('/')
-    @record_metrics()
+    @record_metrics
     def test_route():
         return 'test'
 
@@ -205,43 +205,3 @@ def test_transport_disable(mock_client, mock_get_now):
                 call("ClientError", 0)])
         metrics.close.assert_called_with()
         client.send.assert_has_calls([])
-
-@mock.patch('flask_kadabra._get_now', return_value=NOW)
-@mock.patch('kadabra.Kadabra')
-def test_decorator_dimensions(mock_client, mock_get_now):
-    client = mock_client.return_value
-    client.metrics = MagicMock()
-    metrics = client.metrics.return_value
-    metrics.add_count = MagicMock()
-    metrics.set_timer = MagicMock()
-    metrics.set_dimension = MagicMock()
-    metrics.close = MagicMock()
-    closed = metrics.close.return_value
-    client.send = MagicMock()
-
-    testDimensionName = "testDimensionName"
-    testDimensionValue = "testDimensionValue"
-
-    app = get_app()
-
-    @app.route('/')
-    @record_metrics({testDimensionName: testDimensionValue})
-    def test_route():
-        return 'test'
-
-    unit = Kadabra()
-    unit.init_app(app)
-
-    with app.test_client() as c:
-        c.get('/')
-        client.metrics.assert_called_with()
-        metrics.set_dimension.assert_has_calls([
-                call("method", "test_route"),
-                call(testDimensionName, testDimensionValue)])
-        metrics.set_timer.assert_called_with("RequestTime", NOW - NOW,
-                kadabra.Units.MILLISECONDS)
-        metrics.add_count.assert_has_calls([
-                call("Failure", 0),
-                call("ClientError", 0)])
-        metrics.close.assert_called_with()
-        client.send.assert_called_with(closed)
