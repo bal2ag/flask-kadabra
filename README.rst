@@ -1,6 +1,18 @@
 Flask-Kadabra
 =============
 
+.. image:: https://secure.travis-ci.org/bal2ag/flask-kadabra.png?branch=master
+    :target: http://travis-ci.org/bal2ag/flask-kadabra
+    :alt: Build
+
+.. image:: https://readthedocs.org/projects/flask-kadabra/badge/?version=latest&style
+    :target: http://flask-kadabra.readthedocs.org/
+    :alt: Documentation Status
+
+.. image:: https://coveralls.io/repos/github/bal2ag/flask-kadabra/badge.svg?branch=master
+    :target: https://coveralls.io/github/bal2ag/flask-kadabra?branch=master
+    :alt: Coverage
+
 How quickly can you figure out how many server errors your Flask app is
 throwing? Can you determine which of your routes have the highest error rates?
 Do you know how long, on average, your SQLAlchemy writes take?
