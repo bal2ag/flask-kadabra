@@ -17,7 +17,8 @@ How quickly can you figure out how many server errors your Flask app is
 throwing? Can you determine which of your routes have the highest error rates?
 Do you know how long, on average, your SQLAlchemy writes take?
 
-Flask-Kadabra extends the capabilities of the Kadabra metrics library to Flask:
+Flask-Kadabra extends the capabilities of the
+`Kadabra <https://github.com/bal2ag/kadabra>`_ metrics library to Flask:
 
 - Enable metrics for your routes with a simple decorator.
 - Record metrics from anywhere in your application code, organized by your
@@ -53,4 +54,4 @@ All you have to do is run a local Redis server and run the Kadabra agent
 side-by-side with your Flask app, and you have metrics!
 
 Check out the full docs on `read the docs
-<http://flask-kadabra.readthedocs.io/en/latest/>`_
+<http://flask-kadabra.readthedocs.io/en/latest/>`_.
