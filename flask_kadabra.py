@@ -12,11 +12,20 @@ class Kadabra(object):
     """This object holds ties the Flask application object to the Kadabra
     library. Each app object gets its own :class:`~kadabra.Kadabra` instance,
     which it uses to generate a :class:`~kadabra.client.MetricsCollector` for
-    each request."""
-    def __init__(self, app=None):
+    each request.
+
+    :param app: The Flask application object to initialize.
+    :type app: ~flask.Flask
+
+    :param config: Dictionary of configuration to use for the
+                   :class:`kadabra.Kadabra` client API. For information on
+                   the acceptable values see :ref:`kadabra:configuration`.
+    :type config: dict
+    """
+    def __init__(self, app=None, config=None):
         self.app = app
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, config)
 
     def init_app(self, app, config=None):
         """Configure the application to use Kadabra. Requests will have access

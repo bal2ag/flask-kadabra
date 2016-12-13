@@ -20,11 +20,20 @@ def test_ctor_no_app(mock_init_app):
     assert kadabra.app == None
 
 @mock.patch('flask_kadabra.Kadabra.init_app')
-def test_ctor_no_app(mock_init_app):
+def test_ctor_app(mock_init_app):
     app = MagicMock()
     kadabra = Kadabra(app)
 
-    kadabra.init_app.assert_called_with(app)
+    kadabra.init_app.assert_called_with(app, None)
+    assert kadabra.app == app
+
+@mock.patch('flask_kadabra.Kadabra.init_app')
+def test_ctor_app_config(mock_init_app):
+    app = MagicMock()
+    config = MagicMock()
+    kadabra = Kadabra(app, config)
+
+    kadabra.init_app.assert_called_with(app, config)
     assert kadabra.app == app
 
 @mock.patch('kadabra.Kadabra')
