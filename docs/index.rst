@@ -8,7 +8,8 @@ Do you know how long, on average, your SQLAlchemy writes take?
 Flask-Kadabra extends the capabilities of the Kadabra metrics library to Flask:
 
 - Enable metrics for your routes with a simple decorator.
-- Record metrics from anywhere in your application code.
+- Record metrics from anywhere in your application code, organized by your
+  routes.
 - Automatically track basic metrics per route such as timing and errors.
 
 Installation is simple::
@@ -24,7 +25,7 @@ Setup is easy::
     kadabra = Kadabra(app)
 
     @app.route('/')
-    @record_metrics()
+    @record_metrics
     def index():
         return "Hello, world!"
 

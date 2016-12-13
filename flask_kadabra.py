@@ -18,7 +18,7 @@ class Kadabra(object):
     :type app: ~flask.Flask
 
     :param config: Dictionary of configuration to use for the
-                   :class:`kadabra.Kadabra` client API. For information on
+                   :class:`~kadabra.Kadabra` client API. For information on
                    the acceptable values see :ref:`kadabra:configuration`.
     :type config: dict
     """
@@ -29,8 +29,8 @@ class Kadabra(object):
 
     def init_app(self, app, config=None):
         """Configure the application to use Kadabra. Requests will have access
-        to a :class:`~kadabra.client.MetricsCollector` via the `metrics`
-        attribute of Flask's :attr:`~flask.Flask.g` object. You can record
+        to a :class:`~kadabra.client.MetricsCollector` via the ``metrics``
+        attribute of Flask's :data:`~flask.g` object. You can record
         metrics anywhere in the context of a request like so::
 
             ...
@@ -39,7 +39,7 @@ class Kadabra(object):
 
         The metrics object will be closed and sent at the end of the
         request if any view that handles the request has been annotated with
-        :meth:`~flask_kadabra.record_metrics`."""
+        :data:`~flask_kadabra.record_metrics`."""
         app.kadabra = kadabra.Kadabra(config)
         self.app = app
 
@@ -76,8 +76,14 @@ class Kadabra(object):
             return response
 
 def record_metrics(func):
-    """Views that are annotated with this method will cause any request they
-    handle to send all metrics collected via the Kadabra client API.
+    """Views that are annotated with this decorator will cause any request they
+    handle to send all metrics collected via the Kadabra client API. For
+    example::
+
+        @api.route('/')
+        @record_metrics
+        def index():
+            return 'Hello, world!'
 
     :param func: The view function to decorate.
     :type func: function

@@ -9,11 +9,11 @@ record metrics from your Flask application with minimal additional code!
 - Initialize the :class:`~flask_kadabra.Kadabra` object with your Flask
   application object.
 - Decorate any of your routes for which you want to record metrics with
-  :meth:`~flask_kadabra.record_metrics`.
+  :data:`~flask_kadabra.record_metrics`.
 - Optionally, instrument your application code with any additional metrics you
   want to record with the :class:`~kadabra.client.MetricsCollector` object,
-  available as the `metrics` attribute on the :data:`~flask.g` object. This is
-  shared across your request, is available anywhere within the Flask
+  available as the ``metrics`` attribute on the :data:`~flask.g` object. This
+  is shared across your request, is available anywhere within the Flask
   application context, and is totally threadsafe. Note that you don't need to
   record request timing nor 400/500 errors; these will be automatically
   included for each request.
@@ -71,7 +71,7 @@ Enabling Metrics for Your Routes
 --------------------------------
 
 To record metrics for API requests to one of your routes, simply use the
-:meth:`~flask_kadabra.record_metrics` decorator::
+:data:`~flask_kadabra.record_metrics` decorator::
 
     @api.route('/')
     @record_metrics
