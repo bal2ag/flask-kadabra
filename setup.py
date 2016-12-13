@@ -29,14 +29,15 @@ setup(
     platforms='any',
     install_requires=[
         'Flask',
-        'Kadabra'
+        'Kadabra>=0.4.0'
     ],
     classifiers=[
-        'Environment :: Web Environment',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]
